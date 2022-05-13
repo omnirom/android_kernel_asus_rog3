@@ -229,6 +229,7 @@ struct dsi_panel {
 	unsigned int fod_dim_lut_len;
 	u8 fod_dim_alpha;
 	bool fod_hbm_enabled;
+	bool force_fod_ui;
 
 	// ASUS parameters
 	bool panel_ready_for_cmd;
@@ -366,6 +367,7 @@ void dsi_panel_calc_dsi_transfer_time(struct dsi_host_common_cfg *config,
 		struct dsi_display_mode *mode, u32 frame_threshold_us);
 
 int dsi_panel_set_fod_hbm(struct dsi_panel *panel, bool status);
+bool dsi_panel_get_force_fod_ui(struct dsi_panel *panel);
 
 /*
  * ASUS ROG3 display protocol panel functions
