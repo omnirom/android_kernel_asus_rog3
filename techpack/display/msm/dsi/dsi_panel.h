@@ -230,6 +230,7 @@ struct dsi_panel {
 	u8 fod_dim_alpha;
 	bool fod_hbm_enabled;
 	bool force_fod_ui;
+	bool force_fod_dim_alpha;
 
 	// ASUS parameters
 	bool panel_ready_for_cmd;
