@@ -1857,6 +1857,15 @@ static ssize_t FP_status_show(struct device *dev,
 	return scnprintf(buf, PAGE_SIZE, "%d\n", fp_status);
 }
 
+static ssize_t fod_pressed_show(struct device *dev,
+				    struct device_attribute *attr, char *buf)
+{
+	struct goodix_ts_core *core_data =
+		dev_get_drvdata(dev);
+
+	return snprintf(buf, PAGE_SIZE, "%u\n", finger_press);
+}
+
 static ssize_t keymapping_touch_debug_store(struct device *dev,
 				      struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -1947,6 +1956,7 @@ static DEVICE_ATTR(enable_touch_time_debug,S_IRUGO|S_IWUSR, enable_touch_time_de
 static DEVICE_ATTR(FP_status,S_IRUGO|S_IWUSR, FP_status_show, FP_status_store);
 static DEVICE_ATTR(keymapping_touch_debug,S_IRUGO|S_IWUSR, keymapping_touch_debug_show, keymapping_touch_debug_store);
 static DEVICE_ATTR(touch_INT_debug,S_IRUGO|S_IWUSR, touch_INT_debug_show, touch_INT_debug_store);
+static DEVICE_ATTR(fod_pressed, S_IRUGO, fod_pressed_show, NULL);
 // ASUS_BSP --- Touch
 
 static struct attribute *sysfs_attrs[] = {
@@ -1988,6 +1998,7 @@ static struct attribute *sysfs_attrs[] = {
 	&dev_attr_FP_status.attr,
 	&dev_attr_keymapping_touch_debug.attr,
 	&dev_attr_touch_INT_debug.attr,
+	&dev_attr_fod_pressed.attr,
 // ASUS_BSP --- Touch
 	NULL,
 };
