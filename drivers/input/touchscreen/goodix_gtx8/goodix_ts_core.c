@@ -80,7 +80,6 @@ bool GoodixTSEnTimestampDebug = false;
 bool GoodixTSEnInputTimestampDebug = false;
 bool GoodixTSKeyMappingDebug = false;
 bool GoodixTSINTDebug = false;
-bool finger_press = false;
 int GoodixSampleRate = 240;
 int testkeycode = 0;
 int touch_figer_slot[TOTAL_SLOT] = {0};
@@ -1858,6 +1857,15 @@ static ssize_t FP_status_show(struct device *dev,
 	return scnprintf(buf, PAGE_SIZE, "%d\n", fp_status);
 }
 
+static ssize_t fod_pressed_show(struct device *dev,
+				    struct device_attribute *attr, char *buf)
+{
+	struct goodix_ts_core *core_data =
+		dev_get_drvdata(dev);
+
+	return snprintf(buf, PAGE_SIZE, "%u\n", core_data->finger_press);
+}
+
 static ssize_t keymapping_touch_debug_store(struct device *dev,
 				      struct device_attribute *attr, const char *buf, size_t count)
 {
@@ -1948,6 +1956,7 @@ static DEVICE_ATTR(enable_touch_time_debug,S_IRUGO|S_IWUSR, enable_touch_time_de
 static DEVICE_ATTR(FP_status,S_IRUGO|S_IWUSR, FP_status_show, FP_status_store);
 static DEVICE_ATTR(keymapping_touch_debug,S_IRUGO|S_IWUSR, keymapping_touch_debug_show, keymapping_touch_debug_store);
 static DEVICE_ATTR(touch_INT_debug,S_IRUGO|S_IWUSR, touch_INT_debug_show, touch_INT_debug_store);
+static DEVICE_ATTR(fod_pressed, S_IRUGO, fod_pressed_show, NULL);
 // ASUS_BSP --- Touch
 
 static struct attribute *sysfs_attrs[] = {
@@ -1989,6 +1998,7 @@ static struct attribute *sysfs_attrs[] = {
 	&dev_attr_FP_status.attr,
 	&dev_attr_keymapping_touch_debug.attr,
 	&dev_attr_touch_INT_debug.attr,
+	&dev_attr_fod_pressed.attr,
 // ASUS_BSP --- Touch
 	NULL,
 };
@@ -2500,7 +2510,7 @@ void ATR_touch_new(struct device *dev, int id,int action, int x, int y, int rand
 				x += random_x;
 				y += random_y;
 			}
-			if(!finger_press) {
+			if(!core_data->finger_press) {
 				input_mt_slot(input_dev, first_empty_slot + 10);
 				input_mt_report_slot_state(input_dev, MT_TOOL_FINGER, true);
 				input_report_abs(input_dev, ABS_MT_PRESSURE, 0x3f + random_pressure);
@@ -2514,7 +2524,7 @@ void ATR_touch_new(struct device *dev, int id,int action, int x, int y, int rand
 
 			if (GoodixTSKeyMappingDebug == true)
 				ts_info("slot %d", first_empty_slot+10);
-			if(!finger_press){
+			if(!core_data->finger_press){
 				if(first_continue_flag == false) {
 					ts_info("atr touch down(%d)", random);
 					input_report_key(input_dev, BTN_TOUCH, 1);
@@ -2522,7 +2532,7 @@ void ATR_touch_new(struct device *dev, int id,int action, int x, int y, int rand
 						first_continue_flag = true;
 				}
 			}
-			if(!finger_press)
+			if(!core_data->finger_press)
 				input_sync(input_dev);
 
 			touch_figer_slot[first_empty_slot] = id + 1; // save finger id in slot 
@@ -2543,7 +2553,7 @@ void ATR_touch_new(struct device *dev, int id,int action, int x, int y, int rand
 			ts_info("keymapping  release slot %d", first_empty_slot);
 		if(first_empty_slot >= 0)
 		{
-			if(!finger_press) {
+			if(!core_data->finger_press) {
 				input_mt_slot(input_dev, first_empty_slot + 10);
 				input_mt_report_slot_state(input_dev, MT_TOOL_FINGER, false);
 				ts_info("[ATR_N_R] ID %d active %d x %d y %d p %d m %d", first_empty_slot + 10, action, 0, 0, 0, 0);
@@ -2566,7 +2576,7 @@ void ATR_touch_new(struct device *dev, int id,int action, int x, int y, int rand
 		if(first_continue_flag == true) {
 			first_continue_flag = false;
 		}
-		if(!finger_press)
+		if(!core_data->finger_press)
 		{
 			ts_info("keymapping all button up");
 			input_report_key(input_dev, BTN_TOUCH, 0);
@@ -2869,7 +2879,7 @@ static void goodix_ts_report_finger(struct input_dev *dev,
 			ts_info("atr pressed, ignore touch down event"); 
 		} else {
 			input_report_key(dev, BTN_TOUCH, 1);
-			finger_press = true;
+			core_data->finger_press = true;
 			if (GoodixTSINTDebug == true) {
 				start_count = get_chip_int(core_data);
 			}
@@ -2891,7 +2901,7 @@ static void goodix_ts_report_finger(struct input_dev *dev,
 				}
 			}
 			input_report_key(dev, BTN_TOUCH, 0);
-			finger_press = false;
+			core_data->finger_press = false;
 			first_data = true;
 			
 			if (GoodixTSINTDebug == true) {
@@ -2932,7 +2942,7 @@ static void goodix_ts_report_finger(struct input_dev *dev,
 			input_mt_slot(dev, i);
 			input_mt_report_slot_state(dev, MT_TOOL_FINGER, false);
 			if((core_data->atr_enable) && (touch_num == 0)){
-				finger_press = false;
+				core_data->finger_press = false;
 			}
 			continue;
 		}
@@ -3068,7 +3078,7 @@ static void goodix_ts_report_finger(struct input_dev *dev,
 				}
 			}
 		}
-		finger_press = true;
+		core_data->finger_press = true;
 	}
 	// ATR
 	if (atr_queue_empty(atr_buf_queue) != 1) {
@@ -3833,11 +3843,11 @@ out:
 		if (out_of_KEY_F == true)
 			out_of_KEY_F = false;
 	}
-	if (finger_press == true) { // normal touch
+	if (core_data->finger_press == true) { // normal touch
 		input_report_key(core_data->input_dev, BTN_TOUCH, 0);
 		input_sync(core_data->input_dev);
 		ts_info("release all touch");
-		finger_press = false;
+		core_data->finger_press = false;
 	}
 // ASUS_BSP --- Touch
 	ts_info("Suspend end");
@@ -4186,6 +4196,7 @@ out:
 	atomic_set(&core_data->glove_mode, 0);
 	core_data->game_mode = true;
 	core_data->atr_enable = false;
+    core_data->finger_press= false;
 	init_waitqueue_head(&core_data->fp_queue);
 	if (asus_var_panel_stage[0]!='B'){
 		fod_position = ts_9886_fod_position;

@@ -527,6 +527,7 @@ struct goodix_ts_core {
 	struct workqueue_struct *gts_suspend_resume_wq;
 	struct delayed_work gts_resume_work;
 	wait_queue_head_t fp_queue;
+    bool finger_press;
 // ASUS_BSP --- Touch
 };
 
