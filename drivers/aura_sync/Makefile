@@ -4,10 +4,10 @@
 obj-y		+= ene_8k41.o
 #obj-y		+= ms51_side.o
 #obj-y		+= sky81298.o
-obj-m  		+= ml51fb9ae_inbox.o
-obj-m  		+= ms51_inbox.o
-obj-m    	+= ene_6k582_station.o
-obj-m		+= ene_8k41_dock.o
+obj-y  		+= ml51fb9ae_inbox.o
+obj-y  		+= ms51_inbox.o
+obj-y    	+= ene_6k582_station.o
+obj-y		+= ene_8k41_dock.o
 
 # ASUS_SZ_BSP Yadong : Add for factory test +++
 #ifeq ($(ASUS_FTM), y)
