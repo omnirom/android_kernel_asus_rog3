@@ -1184,24 +1184,24 @@ static int ene_8k41_remove(struct i2c_client *client)
 	return 0;
 }
 
-int ene_8k41_suspend(struct device *dev)
+int ene_8k41_suspend_dock(struct device *dev)
 {
 	int err = 0;
 	if(g_Charger_mode) {
-		printk("[AURA_DT] In charger mode, stop ene_8k41_suspend\n");
+		printk("[AURA_DT] In charger mode, stop ene_8k41_suspend_dock\n");
 		return 0;
 	}
-	printk("[AURA_DT] ene_8k41_suspend : current_mode : 0x%x\n", g_pdata->current_mode);
+	printk("[AURA_DT] ene_8k41_suspend_dock : current_mode : 0x%x\n", g_pdata->current_mode);
 	g_pdata->suspend_state = true;
 
 	return err;
 }
 
-int ene_8k41_resume(struct device *dev)
+int ene_8k41_resume_dock(struct device *dev)
 {
 	int err = 0;
 	if(g_Charger_mode) {
-		printk("[AURA_DT] In charger mode, stop ene_8k41_resume\n");
+		printk("[AURA_DT] In charger mode, stop ene_8k41_resume_dock\n");
 		return 0;
 	}
 	g_pdata->suspend_state = false;
@@ -1216,8 +1216,8 @@ static const struct i2c_device_id ene_8k41_id[] = {
 //MODULE_DEVICE_TABLE(i2c, ene_8k41_id);
 
 static const struct dev_pm_ops ene_8k41_pm_ops = {
-	.suspend	= ene_8k41_suspend,
-	.resume	= ene_8k41_resume,
+	.suspend	= ene_8k41_suspend_dock,
+	.resume	= ene_8k41_resume_dock,
 };
 
 #ifdef CONFIG_OF
