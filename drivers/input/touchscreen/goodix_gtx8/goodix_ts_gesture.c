@@ -41,7 +41,6 @@
 #define DCLICK                   "driver/dclick"
 #define SWIPEUP                  "driver/swipeup"
 
-atomic_t aod_processing;
 bool allow_report_zenmotion = true;
 bool call_state = false;
 int data_x = 0, data_y = 0, data_w = 200;
@@ -85,8 +84,6 @@ static struct gesture_module *gsx_gesture; /*allocated in gesture init module*/
 // ASUS_BSP +++ Touch
 static int check_power(void);
 static void zenmotion_setting(const char *buf, size_t count);
-void enable_aod_processing(bool en);
-bool get_aod_processing(void);
 static void input_switch_key(struct input_dev *dev, unsigned int code);
 // ASUS_BSP --- Touch
 /**
@@ -249,10 +246,6 @@ static ssize_t gsx_aod_enable_store(struct goodix_ext_module *module,
 		atomic_set(&gsx_gesture->aod_enable, 1);
 	} else {
 		atomic_set(&gsx_gesture->aod_enable, 0);
-		if(get_aod_processing()) {
-			ts_info("[KEY_U] aod_enable = 0");
-			enable_aod_processing(false);
-		}
 	}
 
 	check_power();  
@@ -795,7 +788,6 @@ static int report_gesture_key(struct input_dev *dev, char keycode)
 			ts_info("Gesture KEY_F -- X/Y/W data: %d,%d,%d",data_x,data_y,data_w);
 #endif
 			asus_display_report_fod_touched();
-			enable_aod_processing(true);
 #if 0
 			input_mt_slot(dev, 0);
 			input_mt_report_slot_state(dev, MT_TOOL_FINGER, false);
@@ -809,7 +801,6 @@ static int report_gesture_key(struct input_dev *dev, char keycode)
 		}
 		if(keycode == 'U') {
 			ts_info("[KEY_U] keycode = U");
-			enable_aod_processing(false);
 			return 3;
 		}
 		if(keycode == 'L') {
@@ -920,31 +911,6 @@ static int report_gesture_key(struct input_dev *dev, char keycode)
 	}
 	return 2;
 }
-
-void enable_aod_processing(bool en)
-{
-	struct input_dev *input_dev = gts_core_data->input_dev;
-	
-	if((en == true) && (atomic_read(&aod_processing) != 1)) {
-		atomic_set(&aod_processing, 1);
-	} else if ((en == false) && (atomic_read(&aod_processing) != 0)) {
-		atomic_set(&aod_processing, 0);
-		input_switch_key(input_dev, KEY_U);
-		ts_info("KEY_U");
-	}
-	ts_info("[G] aod_processing %d", atomic_read(&aod_processing));
-}
-EXPORT_SYMBOL_GPL(enable_aod_processing);
-
-bool get_aod_processing(void)
-{
-	if(atomic_read(&aod_processing))
-		return true;
-	else
-		return false;
-}
-EXPORT_SYMBOL_GPL(get_aod_processing);
-// ASUS_BSP --- Touch
 
 /**
  * gsx_gesture_ist - Gesture Irq handle
@@ -1135,7 +1101,6 @@ static int gsx_gesture_before_suspend(struct goodix_ts_core *core_data,
 	}
 	ts_info("Set IC in gesture mode");
 	atomic_set(&core_data->suspended, 1);
-	atomic_set(&aod_processing, 0);
 	enable_irq_wake(core_data->irq);
 	return EVT_CANCEL_SUSPEND;
 }

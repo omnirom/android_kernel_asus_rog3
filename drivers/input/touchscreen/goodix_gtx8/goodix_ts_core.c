@@ -108,8 +108,6 @@ extern int data_x;
 extern int data_y;
 
 extern bool asus_display_in_normal_off(void);
-extern void enable_aod_processing(bool en);
-extern bool get_aod_processing(void);
 extern int asus_display_global_hbm_mode(void);
 extern void asus_display_report_fod_touched(void);
 // ASUS_BSP --- Touch
@@ -2379,18 +2377,6 @@ static void goodix_resume_work(struct work_struct *work)
 			ts_info("resume --- wait sec for FP status(%d) process_resume(%d)", fp_status, process_resume);
 		}
 	}
-	if(get_aod_processing() == true) {
-		if(asus_display_global_hbm_mode() == 0) {
-			ts_info("[KEY_U] asus_display_global_hbm_mode = 0");
-			enable_aod_processing(false);
-		} else {
-			ts_info("resume wait 0.5 sec - HBM(%d)", asus_display_global_hbm_mode());
-			schedule_delayed_work(&gts_core_data->gts_resume_work, msecs_to_jiffies(500)); // 0.5 sec
-			return;
-		}
-	} else {
-		ts_info("resume ... ");
-	}
 	mutex_lock(&gts_core_data->gts_suspend_mutex);
 	goodix_ts_resume(gts_core_data);
 	goodix_ts_switch_sample_rate(gts_core_data);
@@ -2852,16 +2838,6 @@ static void goodix_ts_report_finger(struct input_dev *dev,
 	static int end_count = 0;
 	int chip_diff_count = 0;
 // ASUS_BSP --- Touch
-
-	// gesture mode lost key_U +++
-	if(get_aod_processing() == true) {
-		msleep(300);
-		if(get_aod_processing() == true) {
-			ts_info("[KEY_U] before touch event");
-			enable_aod_processing(false);
-		}
-	}
-	// gesture mode lost key_U---
 
 	/*first touch down and last touch up condition*/
 	if (touch_num && !pre_fin) {
