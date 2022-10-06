@@ -51,6 +51,7 @@ extern void asus_display_report_fod_touched(void);
 extern struct goodix_ts_core *gts_core_data;
 extern bool proximityStatus(void);
 extern bool in_aod_doze_mode;
+extern bool finger_press;
 
 // ASUS_BSP --- Touch
 /*
@@ -798,6 +799,7 @@ static int report_gesture_key(struct input_dev *dev, char keycode)
 #endif
 			asus_display_report_fod_touched();
 			enable_aod_processing(true);
+			finger_press = true;
 #if 0
 			input_mt_slot(dev, 0);
 			input_mt_report_slot_state(dev, MT_TOOL_FINGER, false);
@@ -812,6 +814,7 @@ static int report_gesture_key(struct input_dev *dev, char keycode)
 		if(keycode == 'U') {
 			ts_info("[KEY_U] keycode = U");
 			enable_aod_processing(false);
+			finger_press = false;
 			return 3;
 		}
 		if(keycode == 'L') {
@@ -821,6 +824,7 @@ static int report_gesture_key(struct input_dev *dev, char keycode)
 		}
 		if(keycode == 0x4f) {
 			input_switch_key(dev, KEY_O);
+			finger_press = true;
 			ts_info("KEY_O");
 			return 3;
 		}
