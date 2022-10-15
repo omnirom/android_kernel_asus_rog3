@@ -4783,7 +4783,7 @@ int dsi_panel_asus_switch_fps(struct dsi_panel *panel, int type)
 	else if (type == 3)
 		cmd_type = DSI_CMD_SET_144;
 	else if (type == 4)
-		cmd_type = DSI_CMD_SET_160;
+		cmd_type = DSI_CMD_SET_144;
 
 	rc = dsi_panel_tx_cmd_set(panel, cmd_type);
 	if (rc) {
