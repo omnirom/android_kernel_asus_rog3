@@ -354,6 +354,14 @@ static ssize_t gsx_fod_XY_data_show(struct goodix_ext_module *module,
 	return scnprintf(buf, PAGE_SIZE, "%d,%d\n", data_x, data_y);
 }
 
+static ssize_t gsx_fp_state_show(struct goodix_ext_module *module,
+		char *buf)
+{
+	ts_info("Gesture KEY_F X/Y data: %d,%d",data_x,data_y);
+	return scnprintf(buf, PAGE_SIZE, "%d,%d,%d\n",
+				data_x, data_y, data_x || data_y);
+}
+
 static ssize_t fts_aod_ctrl_mode_show(struct goodix_ext_module *module,
 		char *buf)
 {
@@ -400,6 +408,7 @@ const struct goodix_ext_attribute gesture_attrs[] = {
 	__EXTMOD_ATTR(fp_wakeup, 0666, gsx_fp_wakeup_enable_show,
 		gsx_fp_wakeup_enable_store),
 	__EXTMOD_ATTR(XY, 0444, gsx_fod_XY_data_show, NULL),
+	__EXTMOD_ATTR(fp_state, 0444, gsx_fp_state_show, NULL),
 	__EXTMOD_ATTR(fts_aod_ctrl_mode, 0666, fts_aod_ctrl_mode_show,
 		fts_aod_ctrl_mode_store)
 // ASUS_BSP --- Touch
