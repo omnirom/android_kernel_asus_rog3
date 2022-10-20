@@ -58,6 +58,7 @@ extern int  has_pxlw_video_blocker;
 extern int asus_current_fps;
 extern int asus_alpm_bl_high;
 extern int asus_alpm_bl_low;
+extern bool in_aod_doze_mode;
 
 /* ASUS BSP DP +++ */
 int lastBL = 1023;
@@ -582,6 +583,8 @@ static int dsi_panel_power_off(struct dsi_panel *panel)
 	// ASUS_BSP +++ Touch
 	phone_touch_suspend();
 	// ASUS_BSP --- Touch
+
+	in_aod_doze_mode = true;
 
 	dp_panel_suspend(); /* ASUS BSP DP +++ */
 
