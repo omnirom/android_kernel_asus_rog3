@@ -6472,7 +6472,7 @@ static ssize_t asus_display_proc_local_hbm_write(struct file *filp, const char *
 	if (!asus_display_panel_valid())
 		return -EINVAL;
 
-	if (!asus_display_in_normal_off()) {
+	if (!asus_display_in_normal_off() || in_aod_doze_mode) {
 		if (strncmp(messages, "0", 1) == 0) {
 			asus_display_set_local_hbm(0);
 		} else if (strncmp(messages, "1", 1) == 0) {
